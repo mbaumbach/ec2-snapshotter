@@ -28,7 +28,7 @@ IAM role to allow listing volumes, creating and deleting snapshots, and tagging 
 On Linux, you can use `cron` to perform scheduled backups. The following crontab entry will 
 run every night at midnight server local time.
 
-`0 * * * * java -jar /path/to/program/ec2-snapshotter.jar`
+`0 0 * * * java -jar /path/to/program/ec2-snapshotter.jar`
 
 ## License
 
