@@ -4,9 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,23 +61,26 @@ public class Snapshotter {
 		return new DeleteSnapshotRequest(snapshot.getSnapshotId());
 	}
 	
+	private CreateTagsRequest createTagsRequest(String snapshotId) {
+		logger.info("Creating tag for snapshot {}", snapshotId);
+		return new CreateTagsRequest()
+				.withResources(snapshotId)
+				.withTags(new Tag(SNAPSHOTTER_TAG_KEY, TRUE_VALUE));
+	}
+	
 	public Snapshotter createSnapshots() {
 		long start = System.nanoTime();
 		logger.info("Creating snapshots...");
 		DescribeVolumesRequest describeVolumes = new DescribeVolumesRequest()
 				.withFilters(new Filter(FILTER_TAG_BACKUP, Arrays.asList(TRUE_VALUE)));
 		DescribeVolumesResult volumesResult = ec2Client.describeVolumes(describeVolumes);
-		List<String> snapshotIds = volumesResult.getVolumes().stream()
+		volumesResult.getVolumes().stream()
 			.map(this::createSnapshotRequest)
 			.map(ec2Client::createSnapshot)
 			.map(csr -> csr.getSnapshot().getSnapshotId())
-			.collect(Collectors.toList());
+			.map(this::createTagsRequest)
+			.forEach(ec2Client::createTags);
 		logger.info("Completed snapshots in {}s", (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start)));
-		
-		start = System.nanoTime();
-		logger.info("Tagging snapshots...");
-		ec2Client.createTags(new CreateTagsRequest(snapshotIds, Arrays.asList(new Tag(SNAPSHOTTER_TAG_KEY, TRUE_VALUE))));
-		logger.info("Completed tagging snapshots in {}s", (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start)));
 		return this;
 	}
 	
