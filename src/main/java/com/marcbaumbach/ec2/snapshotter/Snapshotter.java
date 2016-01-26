@@ -12,10 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -109,8 +107,7 @@ public class Snapshotter {
 			provider = new StaticCredentialsProvider(new BasicAWSCredentials(args[0], args[1]));
 		} else {
 			logger.info("No credentials found in arguments, attempting to detect credentials");
-			provider = new AWSCredentialsProviderChain(new ProfileCredentialsProvider(), 
-					new InstanceProfileCredentialsProvider());
+			provider = new DefaultAWSCredentialsProviderChain();
 		}
 		return provider;
 	}

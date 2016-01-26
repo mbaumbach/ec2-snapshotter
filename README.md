@@ -29,18 +29,18 @@ The resulting JAR file will be available in the `target` directory.
 
 `java -jar ec2-snapshotter.jar [AWS-Key AWS-Secret]`
 
-The AWS key and secret are optional and when omitted, the program will attempt to use the 
-default user profile credentials and fallback to the EC2 instance profile credentials. 
-Make sure you have the appropriate permissions on your IAM role to allow listing volumes, 
-creating and deleting snapshots, and tagging resources.
+The AWS key and secret are optional and when omitted, the program will attempt to auto-detect 
+the credentials via DefaultAWSCredentialsProviderChain (Environment, system properties, default 
+profile, and finally EC2 instance profile). Make sure you have the appropriate permissions on 
+your IAM role to allow listing volumes, creating and deleting snapshots, and tagging resources.
 
 ## Scheduling the Backup using AWS Lambda
 
 You will need to setup an IAM role that has the appropriate AWS Lambda trust relationship 
 and the appropriate permissions to log events to CloudWatch, read volumes, create tags, 
 read tags, create and delete snapshots. The simplest way to do this is to create a new 
-AWS Lambda service role and give it the AmazonEC2FullAccess managed policy. You may 
-create a more limiting role if you desire that.
+AWS Lambda service role and give it the AmazonEC2FullAccess and CloudWatchLogsFullAccess 
+managed policies. You may create a more limiting role if you desire that.
 
 With the role in place, create a new Java 8 runtime lambda function and upload the built 
 version of this project. After uploading, you can run a Test to verify it creates all 
