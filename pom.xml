@@ -3,9 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.marcbaumbach</groupId>
 	<artifactId>ec2-snapshotter</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>EC2 Snapshotter</name>
 	<description>Takes EC2 snapshots for all volumes tagged with a specific tag.</description>
+	<url>https://github.com/mbaumbach/ec2-snapshotter</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
