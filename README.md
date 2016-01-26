@@ -13,7 +13,7 @@ the backups via a Scheduled Event source.
 
 ## System Requirements
 
-You must have Java 8 on your system classpath to run this program.
+You must have Java 8 to run the executable JAR.
 
 ## Building the program
 
@@ -30,8 +30,9 @@ The resulting JAR file will be available in the `target` directory.
 `java -jar ec2-snapshotter.jar [AWS-Key AWS-Secret]`
 
 The AWS key and secret are optional and when omitted, the program will attempt to use the 
-EC2 instance profile's credentials. Make sure you have the appropriate permissions on your 
-IAM role to allow listing volumes, creating and deleting snapshots, and tagging resources.
+default user profile credentials and fallback to the EC2 instance profile credentials. 
+Make sure you have the appropriate permissions on your IAM role to allow listing volumes, 
+creating and deleting snapshots, and tagging resources.
 
 ## Scheduling the Backup using AWS Lambda
 
@@ -47,7 +48,7 @@ expected snapshots instantly. Depending on how many volumes you plan to backup, 
 need to adjust the Timeout configuration. I'd suggest at least a minute. All other defaults 
 should be sufficient. The Handler value is:
 
-`com.marcbaumbach.ec2.snapshotter.LambdaHandler::performBackup`
+`com.marcbaumbach.ec2.snapshotter.LambdaHandler::handleRequest`
 
 Finally, under the Event sources, create a new event source and select Scheduled Event. You 
 may select any schedule you desire the backup to run on.
