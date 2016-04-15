@@ -56,9 +56,14 @@ public class Snapshotter {
 		return new CreateSnapshotRequest(volume.getVolumeId(), description);
 	}
 	
-	private DeleteSnapshotRequest deleteSnapshotRequest(Snapshot snapshot) {
+	private void deleteSnapshot(Snapshot snapshot) {
 		logger.info("Deleting snapshot {} for volume {}", snapshot.getDescription(), snapshot.getVolumeId());
-		return new DeleteSnapshotRequest(snapshot.getSnapshotId());
+		DeleteSnapshotRequest request = new DeleteSnapshotRequest(snapshot.getSnapshotId());
+		try {
+			ec2Client.deleteSnapshot(request);
+		} catch (Exception e) {
+			logger.error("Error deleting snapshot {}", snapshot.getSnapshotId(), e);
+		}
 	}
 	
 	private CreateTagsRequest createTagsRequest(String snapshotId) {
@@ -96,8 +101,7 @@ public class Snapshotter {
 		Date cutoff = calendar.getTime();
 		snapshotsResult.getSnapshots().stream()
 			.filter(s -> s.getStartTime().before(cutoff))
-			.map(this::deleteSnapshotRequest)
-			.forEach(ec2Client::deleteSnapshot);
+			.forEach(this::deleteSnapshot);
 		logger.info("Completed snapshot cleanup in {}s", (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start)));
 		return this;
 	}
