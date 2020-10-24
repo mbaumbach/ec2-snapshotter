@@ -1,8 +1,9 @@
 package com.marcbaumbach.ec2.snapshotter;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +37,7 @@ public class Snapshotter {
 	private static final String FILTER_TAG_SNAPSHOTTER = "tag:" + SNAPSHOTTER_TAG_KEY;
 	private static final String TRUE_VALUE = "True";
 	private static final String TAG_NAME = "Name";
-	private static final int NUMBER_OF_MONTHS = 1;
+	private static final int NUMBER_OF_DAYS = 30;
 	
 	private AmazonEC2 ec2Client;
 	
@@ -91,14 +92,11 @@ public class Snapshotter {
 	
 	public Snapshotter cleanupSnapshots() {
 		long start = System.nanoTime();
-		logger.info("Cleaning up snapshots older than {} month(s)...", NUMBER_OF_MONTHS);
+		logger.info("Cleaning up snapshots older than {} days(s)...", NUMBER_OF_DAYS);
 		DescribeSnapshotsRequest describeSnapshots = new DescribeSnapshotsRequest()
 				.withFilters(new Filter(FILTER_TAG_SNAPSHOTTER, Arrays.asList(TRUE_VALUE)));
 		DescribeSnapshotsResult snapshotsResult = ec2Client.describeSnapshots(describeSnapshots);
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-		calendar.add(Calendar.MONTH, -NUMBER_OF_MONTHS);
-		Date cutoff = calendar.getTime();
+		Date cutoff = Date.from(LocalDateTime.now().minusDays(NUMBER_OF_DAYS).toInstant(ZoneOffset.UTC));
 		snapshotsResult.getSnapshots().stream()
 			.filter(s -> s.getStartTime().before(cutoff))
 			.forEach(this::deleteSnapshot);
